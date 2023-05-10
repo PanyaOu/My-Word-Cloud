@@ -5,3 +5,6 @@
 .word:hover {
     fill: #795548;
 }
+.svg{
+    outline-style: auto;
+}
