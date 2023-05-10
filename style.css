@@ -1,0 +1,7 @@
+.word {
+    cursor: pointer;
+    transition: fill .3s ease;
+}
+.word:hover {
+    fill: #795548;
+}
