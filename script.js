@@ -1,15 +1,4 @@
-const words = [
-    {text: "Happy", size: 10},
-    {text: "Sad", size: 1},
-    {text: "Nice", size: 2},
-    {text: "Amazing", size: 8},
-    {text: "Joyful", size: 7},
-    {text: "Exciting", size: 9},
-    {text: "Peaceful", size: 4},
-    {text: "Determined", size: 6},
-    {text: "Friendly", size: 3},
-    {text: "Innovative", size: 5}
-];
+const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSxHBxMz6cJfqzR29o1Cc-fe1pjOo-4-FNkvDsVk-CPeMf9CcIBCfc6HYZSrlqP3LLpeDjA0K3jECnP/pubhtml';
 
 const width = 500;
 const height = 500;
@@ -18,14 +7,29 @@ const svg = d3.select("#word-cloud")
     .attr("width", width)
     .attr("height", height);
 
-d3.layout.cloud()
-    .size([width, height])
-    .words(words)
-    .padding(5)
-    .rotate(() => ~~(Math.random() * 2) * 90)
-    .fontSize(d => d.size * 10)
-    .on("end", draw)
-    .start();
+async function FetchWordCloud() {
+    const response = await fetch(sheetUrl);
+    const html = await response.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const table = doc.querySelectorAll('table')[0];  // Get the second table (i.e., second sheet)
+
+    const words = Array.from(table.rows)
+        .slice(1)  // Skip the header row
+        .map(row => ({
+            text: row.cells[1].textContent,
+            size: +row.cells[2].textContent,  // Convert string to number using unary plus operator
+        }));
+
+    d3.layout.cloud()
+        .size([width, height])
+        .words(words)
+        .padding(6)
+        .rotate(() => Math.random() < 0.75 ? 0 : 90)
+        .fontSize(d => d.size * 10)
+        .on("end", draw)
+        .start();
+}
 
 function draw(words) {
     svg.append("g")
@@ -40,3 +44,5 @@ function draw(words) {
         .attr("transform", d => `translate(${[d.x, d.y]})rotate(${d.rotate})`)
         .text(d => d.text);
 }
+
+FetchWordCloud();
