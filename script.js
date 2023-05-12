@@ -45,4 +45,13 @@ function draw(words) {
         .text(d => d.text);
 }
 
+function downloadImage() {
+    html2canvas(document.querySelector("#word-cloud")).then(canvas => {
+        let link = document.createElement('a');
+        link.download = 'word-cloud.jpeg';
+        link.href = canvas.toDataURL("image/jpeg").replace("image/jpeg", "image/octet-stream");
+        link.click();
+    });
+}
+
 FetchWordCloud();
