@@ -20,11 +20,13 @@ async function FetchWordCloud() {
             text: row.cells[1].textContent,
             size: +row.cells[2].textContent,  // Convert string to number using unary plus operator
         }));
+    
+    length = words.length;
 
     d3.layout.cloud()
         .size([width, height])
         .words(words)
-        .padding(6)
+        .padding(8)
         .rotate(() => Math.random() < 0.75 ? 0 : 90)
         .fontSize(d => d.size * 10)
         .on("end", draw)
@@ -45,13 +47,17 @@ function draw(words) {
         .text(d => d.text);
 }
 
-function downloadImage() {
-    html2canvas(document.querySelector("#word-cloud")).then(canvas => {
-        let link = document.createElement('a');
-        link.download = 'word-cloud.jpeg';
-        link.href = canvas.toDataURL("image/jpeg").replace("image/jpeg", "image/octet-stream");
-        link.click();
-    });
-}
+document.getElementById("download-button").addEventListener("click", function() {
+    let serializer = new XMLSerializer();
+    let source = '<?xml version="1.0" standalone="no"?>\r\n' + serializer.serializeToString(svg.node());
+    let url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
+    
+    let downloadLink = document.createElement("a");
+    downloadLink.href = url;
+    downloadLink.download = "word-cloud.svg";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+});
 
 FetchWordCloud();
